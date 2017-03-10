@@ -14,14 +14,11 @@
  *        limitations under the License.
  */
 
-package edu.gvsu.prestongarno;
+package edu.gvsu.prestongarno.sourcegentests.SampleFiles;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import edu.gvsu.prestongarno.annotations.View;
 
-/**
- * Used to test writing and compiling dynamic files at compile time
- */
-@Retention(RetentionPolicy.SOURCE)
-public @interface RewriteMe {
+@View(Presenter = SimpleTestPresenter.class)
+public class SimpleViewClass {
+
 }
