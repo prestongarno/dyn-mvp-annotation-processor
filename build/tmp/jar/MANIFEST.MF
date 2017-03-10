@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Implementation-Version: 0.1
+Repositories: https://github.com/prestongarno/Dynamic-MVP
+Dynamic-MVP: Compile-time dependency injection using annotation proces
+ sing for reusable presenters, events, and event handling
+Content-Type: Compiler plugin
+Library-Name: mvp-compiler
+Created-By: Preston Garno
+

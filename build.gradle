@@ -1,0 +1,46 @@
+group 'CompilerTest'
+version '0.1'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+dependencies {
+    compile project(':core')
+    //testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+clean {
+    delete('../ExampleApplication/libs/mvp-compiler-0.1.jar')
+}
+jar {
+    dependsOn {
+        ':mvp-compiler:clean'
+        ':mvp-compiler:compileJava'
+    }
+    from('build/classes/main/')
+    from('build/resources/main')
+
+    manifest {
+        attributes 'Manifest-Version': '1.0',
+                'Implementation-Version': version,
+                'Dynamic-MVP': 'Compile-time dependency injection using ' +
+                        'annotation processing for reusable presenters, ' +
+                        'events, and event handling',
+                'Content-Type': 'Compiler plugin',
+                'Created-By': 'Preston Garno',
+                'Library-Name': 'mvp-compiler',
+                'Repositories': 'https://github.com/prestongarno/Dynamic-MVP'
+    }
+    //change this once working with Dyn-MVP main again
+    destinationDir = file('../ExampleApplication/libs')
+    baseName = 'mvp-compiler-' + version
+    archiveName = baseName + '.jar'
+    println('making mvp-compiler.jar')
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ['./src/main/java'] }
+        resources { srcDirs = ['./src/main/resources'] }
+    }
+}
