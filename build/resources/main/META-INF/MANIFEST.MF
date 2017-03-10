@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Created-By: 1.8.0_121 (Oracle Corporation)
-Application-Name: Dynamic-MVP
-Application-Description: Compile-time dependency injection using annotation processing for reusable presenters, events, and event handling
-Content-Type: Compiler plugin
-Created-By: Preston Garno
-Library-Name: mvp-compiler
-Repositories: https://github.com/prestongarno/Dynamic-MVP
