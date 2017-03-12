@@ -18,8 +18,8 @@ package edu.gvsu.prestongarno.sourcegentests;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import edu.gvsu.prestongarno.PresenterProcessor;
-import edu.gvsu.prestongarno.sourcegentests.util.Util;
+import edu.gvsu.prestongarno.MVProcessor;
+import edu.gvsu.prestongarno.sourcegentests.TestUtil.TestUtil;
 import org.junit.Test;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -29,25 +29,30 @@ import static com.google.testing.compile.Compiler.javac;
  * *************************************************
  * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests - by Preston Garno on 3/10/17
  ***************************************************/
-public class Sample {
+public class CompilerTests1 {
 
     /**
      * Simple test compile without any annotation processing
      */
     @Test
     public void simpleTestCompile() throws Exception {
-        Compilation compilation = javac().compile(JavaFileObjects.forSourceString("HelloWorld", "final class HelloWorld {}"));
+        Compilation compilation = javac().compile(
+                JavaFileObjects.forSourceString("HelloWorld", "final class HelloWorld {}"));
         assertThat(compilation).succeeded();
     }
 
     @Test
     public void testWithProcessor() throws Exception {
-        String className = "SimpleViewClass";
-        String file = (Util.loadFile(className));
         Compilation compilation =
                 javac()
-                        .withProcessors(new PresenterProcessor())
-                        .compile(JavaFileObjects.forSourceString(className, file));
+                        .withProcessors(new MVProcessor())
+                        .compile(TestUtil.loadClassSet(0));
         assertThat(compilation).succeededWithoutWarnings();
+
+        TestUtil.outputDiagnostics(compilation);
+    }
+
+    @Test
+    public void testMultipleFileCompilation() throws Exception {
     }
 }

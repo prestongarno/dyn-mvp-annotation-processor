@@ -14,11 +14,18 @@
  *        limitations under the License.
  */
 
-package edu.gvsu.prestongarno.sourcegentests.SampleFiles;
+package edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_1;
 
-import edu.gvsu.prestongarno.annotations.View;
+import edu.gvsu.prestongarno.Event;
+import edu.gvsu.prestongarno.annotations.Callback;
 
-@View(Presenter = SimpleTestPresenter.class)
-public class SimpleViewClass {
+/**
+ * *************************************************
+ * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_1 - by Preston Garno on 3/11/17
+ ***************************************************/
+public final class SampleEvent extends Event {
 
+    public SampleEvent(Class<? extends Callback> callbackType) {
+        super(callbackType);
+    }
 }
