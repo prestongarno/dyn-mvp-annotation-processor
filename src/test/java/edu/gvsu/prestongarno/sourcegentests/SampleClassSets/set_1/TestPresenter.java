@@ -18,12 +18,11 @@ package edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_1;
 
 import edu.gvsu.prestongarno.Presenter;
 import edu.gvsu.prestongarno.annotations.EventHandler;
-import edu.gvsu.prestongarno.annotations.Handler;
 
 public class TestPresenter extends Presenter{
 
     @EventHandler
-    public void handleSampleEvent(SampleEvent event) {
+    public void handleSampleEvent() {
 
     }
 }

@@ -16,7 +16,17 @@
 
 group 'CompilerTest'
 version '0.1'
+def jdkHome = System.getenv("JAVA_HOME")
 
+buildscript {
+    repositories {
+        mavenCentral()
+        flatDir { dirs '$jdkHome/lib/'}
+    }
+    dependencies  {
+        classpath files(":tools")
+    }
+}
 apply plugin: 'java'
 apply plugin: 'idea'
 
@@ -26,10 +36,14 @@ repositories {
 }
 
 dependencies {
+    compile files("$jdkHome/lib/tools.jar")
     compile 'com.squareup:javapoet:1.8.0'
+    testCompile ([fileTree(dir: "${System.properties['java.home']}/../lib",
+            include: '*tools.jar'),fileTree(dir: "lib/test", include: '*.jar') ])
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile 'com.google.testing.compile:compile-testing:0.10'
     testCompile ':dynamic-mvp:0.1'
+    testCompile ':mvp-compiler:0.1'
 }
 
 clean {
@@ -37,16 +51,13 @@ clean {
 }
 
 jar {
-    dependsOn {
-//        ':mvp-compiler:clean'
-//        ':mvp-compiler:compileJava'
-    }
     from('build/classes/main/')
-
+    from('libs/tools.jar')
     from('build/resources/main')
 
     manifest {
         attributes 'Manifest-Version': '1.0',
+                'Class-Path': "tools.jar" ,
                 'Implementation-Version': version,
                 'Dynamic-MVP': 'Compile-time dependency injection using ' +
                         'annotation processing for reusable presenters, ' +

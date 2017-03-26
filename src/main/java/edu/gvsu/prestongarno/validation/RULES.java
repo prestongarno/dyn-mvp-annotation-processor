@@ -16,26 +16,28 @@
 
 package edu.gvsu.prestongarno.validation;
 
+import edu.gvsu.prestongarno.MVProcessor;
 import edu.gvsu.prestongarno.validation.exceptions.SyntaxException;
 
 import javax.lang.model.element.*;
-import javax.swing.text.ElementIterator;
+import javax.tools.Diagnostic;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
  * *************************************************
  * Dynamic-MVP - edu.gvsu.prestongarno.validation - by Preston Garno on 3/11/17
- *
+ * <p>
  * Class containing annotation validation implementations.
  * (Say that 5 times fast)
  ***************************************************/
 public final class RULES {
 
-    public static void validate(String name, Element toValidate){
+    public static void validate(String name, Element toValidate) {
         switch (name) {
-            case "DECLARE_IMMUTABLE":
-                if(toValidate instanceof TypeElement){
-                    DECLARE_IMMUTABLE.validateType((TypeElement) toValidate);
+            case "TYPE_IMMUTABLE":
+                if (toValidate instanceof TypeElement) {
+                    TYPE_IMMUTABLE.validateType((TypeElement) toValidate);
                 } else {
                     throw new ClassCastException("You had one job!\n"
                             + toValidate.asType().toString()
@@ -46,17 +48,17 @@ public final class RULES {
     }
 
 
-    private static final TypeValidator DECLARE_IMMUTABLE = (TypeElement typeElement) -> {
+    private static final TypeValidator TYPE_IMMUTABLE = (TypeElement typeElement) -> {
         Modifier modifier;
 
         String name = typeElement.getSimpleName().toString();
-        if(name.isEmpty()) {
+        if (name.isEmpty()) {
             name = typeElement.asType().toString()
                     + " in " + typeElement.getEnclosingElement().toString();
         }
 
         // check final class
-        if(!typeElement.getModifiers().contains(Modifier.FINAL)){
+        if (!typeElement.getModifiers().contains(Modifier.FINAL)) {
             throw new SyntaxException("Type " + name + " must be declared final!");
         }
 
@@ -64,7 +66,7 @@ public final class RULES {
         //check fields of the class
         Element[] nonFinalElements = typeElement.getEnclosedElements()
                 .stream()
-                .filter(o -> o.getKind()==ElementKind.FIELD)
+                .filter(o -> o.getKind() == ElementKind.FIELD)
                 .filter(o -> !o.getModifiers().contains(Modifier.FINAL))
                 .toArray(Element[]::new);
         if (!(nonFinalElements.length == 0)) {
@@ -75,6 +77,30 @@ public final class RULES {
             throw new NotImmutableException(message);
         }
     };
+
+
+    /**
+     * This method has no type safety, only tries to get the field in this class that equals validatorname
+     *
+     * @param validatorName
+     * @return functionalinterface that can be used to invoke on an element
+     */
+    public static Object getValidator(String validatorName) {
+        try {
+        Field match = null;
+            match = Arrays.stream(RULES.class.getDeclaredFields())
+                    .filter(field -> field.getName().equals(validatorName))
+                    .findFirst()
+                    .orElseThrow(InstantiationException::new);
+        match.setAccessible(true);
+            return match.get(match.getClass().newInstance());
+        } catch (Exception e) {
+            MVProcessor.getInstance().messager.
+                    printMessage(Diagnostic.Kind.ERROR, "No such validator for key: " + validatorName);
+            //compiler will exit on ^^
+            return null;
+        }
+    }
 
     private static final class NotImmutableException extends SyntaxException {
 

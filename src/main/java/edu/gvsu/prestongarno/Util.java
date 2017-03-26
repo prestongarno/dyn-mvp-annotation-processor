@@ -41,7 +41,7 @@ public class Util {
                 //annotation values
                 for (AnnotationValue x : mirror.getElementValues().values()) {
                     prettyMirrors = prettyMirrors.concat("\n\t\t\t\t\\- " +
-                            x.toString() + "\t value = " + x.getValue().toString());
+                            x.toString() + "\n\t\t\t\t\tvalue = " + x.getValue().toString());
                 }
             }
         }
