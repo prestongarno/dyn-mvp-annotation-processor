@@ -1,2 +1,6 @@
 build/
-.git
+tools
+*.jar
+tools/*
+libs
+libs/*
