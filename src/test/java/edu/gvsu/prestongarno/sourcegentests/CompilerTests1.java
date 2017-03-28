@@ -20,6 +20,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import edu.gvsu.prestongarno.MVProc;
+import edu.gvsu.prestongarno.annotations.TranslateView;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 import static edu.gvsu.prestongarno.sourcegentests.CompilerUtil.*;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -77,18 +79,23 @@ public class CompilerTests1 {
 				.compile(loadClassSet(2));
 		
 		assertThat(compilation).succeededWithoutWarnings();
+		outputDiagnostics(compilation);
 		
 		ClassLoader loader = (new CompilerUtil().createClassLoader(compilation));
 		
-		final String fullName = CompilerUtil.getFullClassName("SamplePresenter");
+		final String fullName = CompilerUtil.getFullClassName("SampleView");
 		
-		Class view = loader.loadClass(fullName);
+		Class clazz = loader.loadClass(fullName);
 		
-		Object instance = view.newInstance();
+		Object instance = clazz.newInstance();
 		
 		Arrays.stream(instance.getClass().getInterfaces())
 				.forEach(aClass -> System.out.println(aClass.getTypeName()));
 		
+		Arrays.stream(instance.getClass().getMethods()).forEach(method -> System.out.println(method.toString()));
+		
+		System.out.println(instance);
+		assertTrue(instance instanceof TranslateView);
 		outputDiagnostics(compilation);
 	}
 }

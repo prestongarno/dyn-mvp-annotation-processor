@@ -16,29 +16,10 @@
 
 package edu.gvsu.prestongarno.sourcegentests;
 
-import edu.gvsu.prestongarno.Event;
-import edu.gvsu.prestongarno.annotations.View;
-import edu.gvsu.prestongarno.annotations.TranslateView;
-import edu.gvsu.prestongarno.sourcegentests.SamplePresenter;
-import edu.gvsu.prestongarno.sourcegentests.SamplePresenter.NumberRequestEvent;
-
-
 /** **************************************************
- * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleSets.set_2 - by Preston Garno on 3/25/17
+ * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests - by Preston Garno on 3/27/17
  * ***************************************************/
-@View(SamplePresenter.class)
-public class SampleView implements Runnable {
+public class SampleCustomClass {
 	
-	public void onSomeButtonPressed(int parameter) {
-		Event e = new NumberRequestEvent(i -> System.out.println(i));
-	}
 	
-	@Override
-	public void run() {
-	
-	}
-	
-	public String toString() {
-		return new String("This thing shouldn't do anything!");
-	}
 }

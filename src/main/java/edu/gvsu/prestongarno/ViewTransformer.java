@@ -18,8 +18,9 @@ package edu.gvsu.prestongarno;
 
 
 
+import com.sun.source.tree.ReturnTree;
 import com.sun.source.util.Trees;
-import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
@@ -27,12 +28,24 @@ import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.tree.TreeTranslator;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
+import sun.tools.tree.ReturnStatement;
+import com.sun.tools.javac.model.JavacElements;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
+import java.io.OptionalDataException;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.sun.tools.javac.code.Symbol.*;
+import static com.sun.tools.javac.code.Type.*;
+import static com.sun.tools.javac.tree.JCTree.*;
+import static com.sun.tools.javac.util.List.nil;
+import static edu.gvsu.prestongarno.JavacUtil.SymbolScopeUtil.enter;
 
 
 /** **************************************************
@@ -57,14 +70,17 @@ public class ViewTransformer extends TreeTranslator {
 	private JavacProcessingEnvironment env;
 	private Trees trees;
 	private TreeMaker mod;
-	private final ArrayList<SimpleJavaFileObject> fileObjects;
+	private Names names;
+	private JavacElements elements;
+	private Symtab symtab;
 	
 	ViewTransformer(JavacProcessingEnvironment environment) {
 		this.env = environment;
 		trees = Trees.instance(environment);
 		mod = TreeMaker.instance(environment.getContext());
-		
-		this.fileObjects = new ArrayList<>();
+		elements = JavacElements.instance(environment.getContext());
+		names = Names.instance(environment.getContext());
+		this.symtab = Symtab.instance(environment.getContext());
 		this.sourceMap = getSourceMap(environment);
 	}
 	
@@ -73,55 +89,103 @@ public class ViewTransformer extends TreeTranslator {
 	}
 	
 	@Override
-	public void visitLambda(JCTree.JCLambda lambda) {
-		super.visitLambda(lambda);
-		System.out.println(lambda.body.toString());
-	}
-	
-	@Override
-	public void visitClassDef(JCTree.JCClassDecl decl) {
+	public void visitClassDef(JCClassDecl decl) {
 		super.visitClassDef(decl);
 		
-		Symbol.ClassSymbol translateSym =
+		ClassSymbol translateSym =
 				env.getElementUtils()
 						.getTypeElement("edu.gvsu.prestongarno.annotations.TranslateView");
 		
-		final JCTree.JCExpression[] ts = new JCTree.JCExpression[decl.implementing.size() + 1];
 		
-		// trying to tack on an implementation here
-		JCTree.JCExpression exp = mod.Ident(translateSym);
 		
-		//Types.instance(this.env.getContext()).boxedClass(((Type) t));
-		ts[decl.implementing.size()]  = exp;
-		Iterator<JCTree.JCExpression> it = decl.implementing.iterator();
-		for (int i = 0; i < decl.implementing.size(); i++) {
-			ts[i] = it.next();
-		}
+		JCFieldAccess iae = mod.Select(
+				mod.Select(
+						mod.Ident(elements.getName("java")),
+						elements.getName("lang")),
+				elements.getName("IllegalArgumentException"));
 		
-		List<JCTree.JCExpression> implementsList = List.from(ts);
+		MethodSymbol m = (MethodSymbol)
+				JavacUtil.SymbolScopeUtil.getMembersList(translateSym).get(0);
 		
-		Symbol.MethodSymbol m = (Symbol.MethodSymbol) translateSym.members().getElements().iterator().next();
+		JCModifiers modifiers = mod.Modifiers(Flags.PUBLIC);
+		Name name = m.name;
+		JCExpression methodReturnType = mod.Type(m.getReturnType());
+		List<JCTypeParameter> methodGenerics = List.nil();
+		List<JCTree.JCVariableDecl> methodParams = List.nil();
+		List<JCTree.JCExpression> methodThrows = List.nil();
+		final List<JCStatement> of = List.of(mod.Throw(mod.NewClass(
+				null,
+				List.nil(),
+				iae,
+				List.nil(),
+				null
+		)));
+		JCBlock methBlock = mod.Block(0, of);
 		
-		JCTree.JCMethodDecl meth = mod.MethodDef(m, null);
-		meth.sym.owner = decl.sym;
-		JCTree[] contents = new JCTree[decl.defs.size() + 1];
-		contents[contents.length - 1] = meth;
 		
-		for (int i = 0; i < decl.defs.size(); i++) {
-			contents[i] = decl.defs.get(i);
-		}
-		
-		result =  mod.ClassDef(
-				decl.mods,
-				decl.name,
-				decl.typarams,
-				decl.extending,
-				implementsList,
-				List.from(contents)
+		JCMethodDecl meth = mod.MethodDef(
+				modifiers,
+				name,
+				methodReturnType,
+				methodGenerics,
+				methodParams,
+				methodThrows,
+				methBlock,
+				null
 		);
 		
+		meth.sym = m;
+		meth.sym.owner = decl.sym;
+		decl.defs = decl.defs.append(meth);
+		
+		ClassSymbol symbol = decl.sym;
+		ClassType TYPE = (ClassType) symbol.type;
+		decl.implementing = decl.implementing.append(mod.Ident(translateSym));
+		TYPE.all_interfaces_field = TYPE.all_interfaces_field.append(translateSym.type);
+		TYPE.interfaces_field = TYPE.interfaces_field.append(translateSym.type);
+		
+		fixMethodMirror(
+				symbol,
+				meth.getModifiers().flags,
+				meth.name,
+				List.from(methodParams.stream().map(decl1 -> decl1.type).collect(Collectors.toList())),
+				methodReturnType.type);
+		
+		// change the interfaces on the type
+		TYPE.tsym = symbol;
+		result.type = TYPE;
+		
+		System.out.println(result);
 	}
 	
+	
+	/*****************************************
+	 * Fixes other references/scopes to this method without closing the class for modification
+	 * @param cs
+	 * @param access
+	 * @param methodName
+	 * @param paramTypes
+	 * @param returnType
+	 ****************************************/
+	private void fixMethodMirror( ClassSymbol cs,
+												long access,
+												Name methodName,
+												List<Type> paramTypes,
+												Type returnType) {
+		
+		final MethodType methodSym = new MethodType(paramTypes,
+				returnType,
+				List.nil(),
+				symtab.methodClass);
+		
+		MethodSymbol methodSymbol = new MethodSymbol(
+				access,
+				methodName,
+				methodSym,
+				cs);
+		
+		enter(cs, methodSymbol);
+	}
 	/*****************************************
 	 * Getter for property 'trees'.
 	 *
@@ -160,16 +224,6 @@ public class ViewTransformer extends TreeTranslator {
 			Map<JavaFileObject, DiagnosticSource> sourceMap =
 					(Map<JavaFileObject, DiagnosticSource>) f.get(logger);
 			
-			sourceMap.keySet().forEach(object -> {
-				try {
-					Field field = object.getClass().getSuperclass().getDeclaredField("clientFileObject");
-					field.setAccessible(true);
-					this.fileObjects.add((SimpleJavaFileObject) field.get(object));
-				} catch (Exception e) {
-					throw new RuntimeException(e.getMessage());
-				}
-			});
-			
 			Map<String, ArrayList<JCTree>> classes = new HashMap<>();
 			
 			for (DiagnosticSource ds : sourceMap.values()) {
@@ -201,12 +255,4 @@ public class ViewTransformer extends TreeTranslator {
 		return null;
 	}
 	
-	ArrayList<SimpleJavaFileObject> getFileObjects() {
-		return this.fileObjects;
-	}
-/*
-	Type t = decl.extending == null ? null : decl.extending.type;
-		if (t != null && t.tsym != null && t.tsym.toString().equals("edu.gvsu.prestongarno.Event")) {
-				//modify the call() method from this
-				}*/
 }

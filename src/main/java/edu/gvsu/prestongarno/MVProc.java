@@ -17,7 +17,6 @@
 
 package edu.gvsu.prestongarno;
 
-import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import edu.gvsu.prestongarno.annotations.View;
 
@@ -25,7 +24,6 @@ import java.util.*;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import javax.tools.SimpleJavaFileObject;
 
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -48,12 +46,7 @@ public class MVProc extends AbstractProcessor {
 	/******************************************************************************************/
 	private static MVProc instance;
 	
-	private int roundCount;
 	private ViewTransformer viewTransformer;
-	
-	public MVProc() {
-		this.roundCount = 0;
-	}
 	
 	@Override
 	public synchronized void init(ProcessingEnvironment pe) {
@@ -63,22 +56,17 @@ public class MVProc extends AbstractProcessor {
 	
 	@Override
 	public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-		this.initializeProc(roundEnvironment);
-		//validating all that are tagged with annotation rules
-		  /*mvp_annotations.stream().peek(roundEnvironment::getElementsAnnotatedWith)
-					 .filter(element -> element.getEnclosingElement()
-                        .getAnnotationMirrors()
-                        .stream()
-                        .allMatch(o -> o.getAnnotationType()
-                                .equals(this.annotationRule))).forEach(System.out::println);*/
-		//.peek(element -> Checker.check(NEED_ABOVE_ELEMENT, element.getEnclosedElements().toString())).;
-		viewTransformer = new ViewTransformer(this.javacEnv);
-		
-		for (Element o : roundEnvironment.getElementsAnnotatedWith(View.class)) {
-			this.viewTransformer.getTree(o).accept(viewTransformer);
+		if (!roundEnvironment.processingOver()) {
+			this.initializeProc(roundEnvironment);
+			
+			viewTransformer = new ViewTransformer(this.javacEnv);
+			
+			for (Element o : roundEnvironment.getElementsAnnotatedWith(View.class)) {
+				this.viewTransformer.getTree(o).accept(viewTransformer);
+			}
+			
+			instance = null;
 		}
-		
-		instance = null;
 		return false;
 	}
 	
@@ -86,14 +74,15 @@ public class MVProc extends AbstractProcessor {
 	 * Initializes all the stuff needed for the processing proces
 	 */
 	private void initializeProc(RoundEnvironment roundEnvironment) {
-		this.roundCount++;
-		this.roundEnvironment = roundEnvironment;
-		this.messager = this.processingEnv.getMessager();
-		
-		this.annotationRule = this.processingEnv.getElementUtils()
-				.getTypeElement("edu.gvsu.prestongarno.annotations.meta.AnnotationRule");
-		if (this.annotationRule == null)
-			throw new LinkageError("Error: Module dynamic-mvp not found\nCheck build dependencies to resolve.");
+		if (!roundEnvironment.processingOver()) {
+			this.roundEnvironment = roundEnvironment;
+			this.messager = this.processingEnv.getMessager();
+			
+			this.annotationRule = this.processingEnv.getElementUtils()
+					.getTypeElement("edu.gvsu.prestongarno.annotations.meta.AnnotationRule");
+			if (this.annotationRule == null)
+				throw new LinkageError("Error: Module dynamic-mvp not found\nCheck build dependencies to resolve.");
+		}
 	}
 	
 	public static MVProc getInstance() {
@@ -101,9 +90,5 @@ public class MVProc extends AbstractProcessor {
 			throw new Error("Unfortunately instance of MVProcessor " +
 					"doesn't exist yet operations are still running.");
 		return instance;
-	}
-	
-	public List<SimpleJavaFileObject> getFileObject() {
-		return this.viewTransformer.getFileObjects();
 	}
 }

@@ -125,12 +125,12 @@ public class CompilerUtil {
 			
 			@Override
 			protected Class<?> findClass(String name) throws ClassNotFoundException {
-				System.out.println("Loading class: " + name);
+				System.out.println("Loading compiled class: " + name);
 				
 				JavaFileObject mc = this.getFileFromName(name, files);
 				
 				if (mc != null) {
-					final CharSequence content;
+					
 					try {
 						
 						byte[] bytes = new byte[500000];
@@ -151,7 +151,6 @@ public class CompilerUtil {
 																		List<JavaFileObject> input) {
 				return input.stream().filter(object -> {
 					final URI normalize = object.toUri().normalize();
-					System.out.println(normalize.toString());
 					String curr = normalize.toString();
 					curr = curr.substring(("mem:///CLASS_OUTPUT/").length(),
 							curr.length() - ".class".length());
@@ -188,15 +187,4 @@ public class CompilerUtil {
 	static String getFullClassName(String shortName) {
 		return "edu.gvsu.prestongarno.sourcegentests." + shortName;
 	}
-	
-	public static byte[] hexStringToByteArray(String s) {
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-					+ Character.digit(s.charAt(i + 1), 16));
-		}
-		return data;
-	}
-	
 }
