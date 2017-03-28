@@ -17,14 +17,16 @@
 package edu.gvsu.prestongarno.sourcegentests;
 
 import com.google.testing.compile.Compilation;
+import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
-import edu.gvsu.prestongarno.MVProcessor;
-import edu.gvsu.prestongarno.sourcegentests.TestUtil.TestUtil;
+import edu.gvsu.prestongarno.MVProc;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
-import static edu.gvsu.prestongarno.sourcegentests.TestUtil.TestUtil.*;
+import static edu.gvsu.prestongarno.sourcegentests.CompilerUtil.*;
 
 
 /**
@@ -48,7 +50,7 @@ public class CompilerTests1 {
 	public void testWithProcessor() throws Exception {
 		Compilation compilation =
 				javac()
-						.withProcessors(new MVProcessor())
+						.withProcessors(new MVProc())
 						.compile(loadClassSet(0));
 		assertThat(compilation).succeededWithoutWarnings();
 		
@@ -58,7 +60,35 @@ public class CompilerTests1 {
 	@Test
 	public void testMultipleFileCompilation() throws Exception {
 		Compilation compilation = javac()
-				.withProcessors(new MVProcessor())
+				.withProcessors(new MVProc())
 				.compile(loadClassSet(2));
+		outputDiagnostics(compilation);
+	}
+	
+	/*****************************************
+	 * FIRST custom, modified class loaded into memory and instance created!
+	 ****************************************/
+	@Test
+	public void testClassloaderCreateFiles() throws Exception {
+		final Compiler javac = javac();
+		final MVProc proc = new MVProc();
+		Compilation compilation = javac
+				.withProcessors(proc)
+				.compile(loadClassSet(2));
+		
+		assertThat(compilation).succeededWithoutWarnings();
+		
+		ClassLoader loader = (new CompilerUtil().createClassLoader(compilation));
+		
+		final String fullName = CompilerUtil.getFullClassName("SamplePresenter");
+		
+		Class view = loader.loadClass(fullName);
+		
+		Object instance = view.newInstance();
+		
+		Arrays.stream(instance.getClass().getInterfaces())
+				.forEach(aClass -> System.out.println(aClass.getTypeName()));
+		
+		outputDiagnostics(compilation);
 	}
 }

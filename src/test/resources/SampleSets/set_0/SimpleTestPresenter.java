@@ -14,11 +14,10 @@
  *        limitations under the License.
  */
 
-package edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_0;
+package edu.gvsu.prestongarno.sourcegentests.SampleSets.set_0;
 
-import edu.gvsu.prestongarno.annotations.View;
+import edu.gvsu.prestongarno.Presenter;
 
-@View(SimpleTestPresenter.class)
-public class SimpleViewClass {
+public class SimpleTestPresenter extends Presenter{
 
 }

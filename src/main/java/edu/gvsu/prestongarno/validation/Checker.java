@@ -16,7 +16,7 @@
 
 package edu.gvsu.prestongarno.validation;
 
-import edu.gvsu.prestongarno.MVProcessor;
+import edu.gvsu.prestongarno.MVProc;
 import javax.tools.Diagnostic;
 import java.lang.reflect.Method;
 
@@ -36,7 +36,7 @@ public class Checker {
         try {
             m.invoke(validator, element);
         } catch (Exception e) {
-            MVProcessor.getInstance().messager.
+            MVProc.getInstance().messager.
                     printMessage(Diagnostic.Kind.ERROR, "Something went wrong with validating "
                             + element.toString() + " with validator "
                             + validator + " with method " + m.toString());

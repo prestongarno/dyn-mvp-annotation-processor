@@ -11,49 +11,47 @@
  *        distributed under the License is distributed on an "AS IS" BASIS,
  *        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *        See the License for the specific language governing permissions and
- *        limitations under the License.
+ *        limitations under the License
+ *        .
  */
 
 package edu.gvsu.prestongarno;
 
-
-
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
-import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.TreeTranslator;
-import com.sun.tools.javac.util.Log;
+import edu.gvsu.prestongarno.annotations.View;
 
 import java.util.*;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
-import javax.tools.Diagnostic;
+import javax.tools.SimpleJavaFileObject;
 
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes("*")
-public class MVProcessor extends AbstractProcessor {
+public class MVProc extends AbstractProcessor {
 	
 	
-	public RoundEnvironment roundEnvironment;
+	
+	RoundEnvironment roundEnvironment;
 	public Messager messager;
 	
 	//Rules annotation type element:
-	public TypeElement annotationRule;
-	public List<DeclaredType> mvp_annotations;
+	TypeElement annotationRule;
 	
 	/******************************************************************************************
 	 * Hacks with the AST
 	 ******************************************************************************************/
 	//Context javaContext;
-	private JavacProcessingEnvironment javacEnv;
+	JavacProcessingEnvironment javacEnv;
 	/******************************************************************************************/
-	private static MVProcessor instance;
+	private static MVProc instance;
 	
 	private int roundCount;
+	private ViewTransformer viewTransformer;
 	
-	public MVProcessor() {
+	public MVProc() {
 		this.roundCount = 0;
 	}
 	
@@ -68,26 +66,24 @@ public class MVProcessor extends AbstractProcessor {
 		this.initializeProc(roundEnvironment);
 		//validating all that are tagged with annotation rules
 		  /*mvp_annotations.stream().peek(roundEnvironment::getElementsAnnotatedWith)
-                .filter(element -> element.getEnclosingElement()
+					 .filter(element -> element.getEnclosingElement()
                         .getAnnotationMirrors()
                         .stream()
                         .allMatch(o -> o.getAnnotationType()
                                 .equals(this.annotationRule))).forEach(System.out::println);*/
 		//.peek(element -> Checker.check(NEED_ABOVE_ELEMENT, element.getEnclosedElements().toString())).;
+		viewTransformer = new ViewTransformer(this.javacEnv);
 		
-		AstTransformer transformer = new AstTransformer(this.javacEnv);
+		for (Element o : roundEnvironment.getElementsAnnotatedWith(View.class)) {
+			this.viewTransformer.getTree(o).accept(viewTransformer);
+		}
 		
-		roundEnvironment.getRootElements().stream()
-				.filter(o -> o.getKind() == ElementKind.CLASS)
-				.map(o -> (JCTree) transformer.getTrees().getTree(o)).forEach(tree -> tree.accept((TreeTranslator) transformer));
-		
-		List<Log> listLogs = new ArrayList<>();
 		instance = null;
 		return false;
 	}
 	
 	/**
-	 * Initializes all the stuff needed for the processing process
+	 * Initializes all the stuff needed for the processing proces
 	 */
 	private void initializeProc(RoundEnvironment roundEnvironment) {
 		this.roundCount++;
@@ -98,35 +94,16 @@ public class MVProcessor extends AbstractProcessor {
 				.getTypeElement("edu.gvsu.prestongarno.annotations.meta.AnnotationRule");
 		if (this.annotationRule == null)
 			throw new LinkageError("Error: Module dynamic-mvp not found\nCheck build dependencies to resolve.");
-		
-/*		this.mvp_annotations = processingEnv.getElementUtils()
-				.getPackageElement("edu.gvsu.prestongarno.annotations")
-				.getEnclosedElements()
-				.stream()
-				.filter(o -> o.getKind() == ElementKind.ANNOTATION_TYPE)
-				.map(Element::asType)
-				.filter(typeMirror -> typeMirror instanceof DeclaredType)
-				.map(typeMirror -> (DeclaredType) typeMirror)
-				.peek(type -> this.printAllElementsOf(type.asElement()))
-				.collect(toList());
-		System.out.println("Processing round (" + this.roundCount + ") elements>>");*/
 	}
 	
-	public static MVProcessor getInstance() {
-		// This should never happen, but we want to know if it does
+	public static MVProc getInstance() {
 		if (instance == null)
 			throw new Error("Unfortunately instance of MVProcessor " +
 					"doesn't exist yet operations are still running.");
 		return instance;
 	}
 	
-	private void printAllElementsOf(Element element) {
-		this.messager.printMessage(Diagnostic.Kind.NOTE,
-				"\nDetails for TypeElement: " + element.toString()
-						+ Util.prettyPrintElement(element), element);
-		List<? extends Element> subElements = element.getEnclosedElements();
-		for (Element e : subElements) {
-			this.messager.printMessage(Diagnostic.Kind.NOTE, "++\n" + Util.prettyPrintElement(e), e);
-		}
+	public List<SimpleJavaFileObject> getFileObject() {
+		return this.viewTransformer.getFileObjects();
 	}
 }

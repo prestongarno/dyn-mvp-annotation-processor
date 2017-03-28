@@ -14,7 +14,7 @@
  *        limitations under the License.
  */
 
-package edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_1;
+package edu.gvsu.prestongarno.sourcegentests.SampleSets.set_1;
 
 import edu.gvsu.prestongarno.annotations.View;
 

@@ -14,7 +14,7 @@
  *        limitations under the License.
  ****************************************/
 
-package edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_2;
+package edu.gvsu.prestongarno.sourcegentests;
 
 import edu.gvsu.prestongarno.Event;
 import edu.gvsu.prestongarno.Presenter;
@@ -23,7 +23,7 @@ import edu.gvsu.prestongarno.annotations.EventHandler;
 
 
 /** **************************************************
- * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_2 - by Preston Garno on 3/25/17
+ * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleSets.set_2 - by Preston Garno on 3/25/17
  * ***************************************************/
 public class SamplePresenter extends Presenter {
 	
@@ -48,6 +48,11 @@ public class SamplePresenter extends Presenter {
 	static class NumberRequestEvent extends Event<OnNumberProvided> {
 		public NumberRequestEvent(OnNumberProvided callback) {
 			super(callback);
+		}
+		
+		@Override
+		public OnNumberProvided call() {
+			return super.call();
 		}
 	}
 	

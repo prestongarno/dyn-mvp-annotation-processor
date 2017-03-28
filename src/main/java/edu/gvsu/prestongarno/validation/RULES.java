@@ -16,7 +16,7 @@
 
 package edu.gvsu.prestongarno.validation;
 
-import edu.gvsu.prestongarno.MVProcessor;
+import edu.gvsu.prestongarno.MVProc;
 import edu.gvsu.prestongarno.validation.exceptions.SyntaxException;
 
 import javax.lang.model.element.*;
@@ -95,7 +95,7 @@ public final class RULES {
         match.setAccessible(true);
             return match.get(match.getClass().newInstance());
         } catch (Exception e) {
-            MVProcessor.getInstance().messager.
+            MVProc.getInstance().messager.
                     printMessage(Diagnostic.Kind.ERROR, "No such validator for key: " + validatorName);
             //compiler will exit on ^^
             return null;

@@ -14,22 +14,25 @@
  *        limitations under the License.
  */
 
-package edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_2;
+package edu.gvsu.prestongarno.sourcegentests;
 
 import edu.gvsu.prestongarno.Event;
-import edu.gvsu.prestongarno.Presenters;
 import edu.gvsu.prestongarno.annotations.View;
-import edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_2.SamplePresenter.NumberRequestEvent;
+import edu.gvsu.prestongarno.sourcegentests.SamplePresenter.NumberRequestEvent;
 
 
 /** **************************************************
- * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleClassSets.set_2 - by Preston Garno on 3/25/17
+ * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleSets.set_2 - by Preston Garno on 3/25/17
  * ***************************************************/
 @View(SamplePresenter.class)
-public class SampleView {
+public class SampleView implements Runnable {
 	
 	public void onSomeButtonPressed(int parameter) {
 		Event e = new NumberRequestEvent(i -> System.out.println(i));
 	}
 	
+	@Override
+	public void run() {
+	
+	}
 }
