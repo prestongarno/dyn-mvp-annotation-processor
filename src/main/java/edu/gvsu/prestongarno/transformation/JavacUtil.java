@@ -12,31 +12,113 @@
  *        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *        See the License for the specific language governing permissions and
  *        limitations under the License.
- ****************************************/
+ */
 
-package edu.gvsu.prestongarno;
+package edu.gvsu.prestongarno.transformation;
 
-import com.sun.tools.javac.code.Scope;
-import com.sun.tools.javac.code.Symbol;
+import com.sun.source.util.Trees;
+import com.sun.tools.javac.code.*;
+import com.sun.tools.javac.tree.TreeMaker;
+import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.util.List;
+import static com.sun.tools.javac.tree.JCTree.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.sun.tools.javac.code.Symbol.*;
+import static com.sun.tools.javac.code.Type.*;
+
 
 
 /** **************************************************
  * Dynamic-MVP - edu.gvsu.prestongarno - by Preston Garno on 3/28/17
+ *
+ * Class to add behaviour to types
  * ***************************************************/
 public class JavacUtil {
 	
 	
+	public static JCClassDecl implementInterface(Context context,
+																JCClassDecl classDecl,
+																Type interfaceToAdd,
+																List<JCMethodDecl> methods) {
+		
+		TreeMaker maker = TreeMaker.instance(context);
+		
+		classDecl.implementing = classDecl.implementing.append(maker.Ident(interfaceToAdd.tsym));
+		
+		for (JCMethodDecl tr : methods) {
+			classDecl = injectMethod(context, classDecl, tr);
+		}
+		
+		ClassSymbol symbol = classDecl.sym;
+		ClassType TYPE = (ClassType) symbol.type;
+		TYPE.all_interfaces_field = TYPE.all_interfaces_field.append(interfaceToAdd);
+		TYPE.interfaces_field = TYPE.interfaces_field.append(interfaceToAdd);
+		
+		// change the interfaces on the type
+		TYPE.tsym = symbol;
+		classDecl.type = TYPE;
+		return classDecl;
+	}
+	
+	public static JCClassDecl injectMethod(Context context, JCClassDecl classDecl, JCMethodDecl method) {
+		
+		classDecl.defs = classDecl.defs.append(method);
+		
+		ClassSymbol symbol = classDecl.sym;
+		
+		method.sym = fixMethodMirror(
+				context,
+				symbol,
+				method.getModifiers().flags,
+				method.name,
+				List.from(method.getParameters().stream()
+						.map(decl1 -> decl1.type)
+						.collect(Collectors.toList())),
+				method.getReturnType().type);
+		
+		method.sym.owner = classDecl.sym;
+		
+		return classDecl;
+	}
+	
+	
 	/*****************************************
-	 * Helper class using Reflection to prevent Javac from finalizing/completing
-	 * symbols before transformation
+	 * Fixes other references/scopes to this method without closing the class for modification
+	 * @param cs
+	 * @param access
+	 * @param methodName
+	 * @param paramTypes
+	 * @param returnType
+	 ****************************************/
+	private static MethodSymbol fixMethodMirror( Context context,
+													 ClassSymbol cs,
+													 long access,
+													 Name methodName,
+													 List<Type> paramTypes,
+													 Type returnType) {
+		
+		final MethodType methodSym = new MethodType( paramTypes,
+				returnType,
+				List.nil(),
+				Symtab.instance(context).methodClass);
+		
+		MethodSymbol methodSymbol = new MethodSymbol(	access,
+																		methodName,
+																		methodSym,
+																		cs);
+		
+		JavacUtil.SymbolScopeUtil.enter(cs, methodSymbol);
+		
+		return methodSymbol;
+	}
+	/*****************************************
+	 * Helper class using Reflection to prevent Javac from
+	 * finalizing/completing symbols before transformation
 	 ****************************************/
 	static class SymbolScopeUtil {
 		private static final Field membersField;
@@ -77,14 +159,14 @@ public class JavacUtil {
 			} catch (Exception e) {e.printStackTrace();}
 		}
 		
-		static List<Symbol> getMembersList(Symbol symbol) {
+		static ArrayList<Symbol> getMembersList(Symbol symbol) {
 			Scope c = getField(membersField, Scope.class, symbol);
 			Scope.Entry[] entries = getField(scopeEntryArray, Scope.Entry[].class, c);
 			return Arrays
 					.stream(entries)
 					.filter(Objects::nonNull)
 					.map(entry -> entry.sym)
-					.collect(Collectors.toList());
+					.collect(Collectors.toCollection(ArrayList::new));
 		}
 		
 		@SuppressWarnings("unchecked")

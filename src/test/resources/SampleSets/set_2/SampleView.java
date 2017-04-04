@@ -27,16 +27,13 @@ import edu.gvsu.prestongarno.sourcegentests.SamplePresenter.NumberRequestEvent;
  * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleSets.set_2 - by Preston Garno on 3/25/17
  * ***************************************************/
 @View(SamplePresenter.class)
-public class SampleView implements Runnable {
+public class SampleView {
 	
 	public void onSomeButtonPressed(int parameter) {
-		Event e = new NumberRequestEvent(i -> System.out.println(i));
+		Event e = new NumberRequestEvent(i -> System.out.println(this.toString() + " " + i));
 	}
 	
-	@Override
-	public void run() {
-	
-	}
+	final SamplePresenter.OnNumberProvided numberProvided = number -> System.out.println(number);
 	
 	public String toString() {
 		return new String("This thing shouldn't do anything!");

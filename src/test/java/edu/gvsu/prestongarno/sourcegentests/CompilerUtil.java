@@ -18,9 +18,12 @@ package edu.gvsu.prestongarno.sourcegentests;
 
 import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.Compilation;
-import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.tools.*;
 import java.io.*;
 import java.lang.reflect.Field;
@@ -29,7 +32,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 
 import java.io.IOException;
@@ -44,6 +46,7 @@ import static java.util.stream.Collectors.*;
  * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.TestUtil - by Preston Garno on 3/10/17
  ****************************************/
 public class CompilerUtil {
+	
 	
 	private static final String MAGIC_NUMBER = "CAFEBABE";
 	
@@ -69,6 +72,8 @@ public class CompilerUtil {
 	
 	@FunctionalInterface
 	private interface Logger {
+		
+		
 		Path print(Path path);
 	}
 	
@@ -79,6 +84,8 @@ public class CompilerUtil {
 	
 	@FunctionalInterface
 	private interface PathConverter {
+		
+		
 		JavaFileObject toJavaFileObject(Path path);
 	}
 	
@@ -148,7 +155,7 @@ public class CompilerUtil {
 			}
 			
 			private JavaFileObject getFileFromName(String name,
-																		List<JavaFileObject> input) {
+																List<JavaFileObject> input) {
 				return input.stream().filter(object -> {
 					final URI normalize = object.toUri().normalize();
 					String curr = normalize.toString();
@@ -186,5 +193,33 @@ public class CompilerUtil {
 	 ****************************************/
 	static String getFullClassName(String shortName) {
 		return "edu.gvsu.prestongarno.sourcegentests." + shortName;
+	}
+	
+	public static String prettyPrintElement(Element element) {
+		List<? extends AnnotationMirror> annotationMirrors = element.getAnnotationMirrors();
+		String prettyMirrors = "";
+		if (annotationMirrors.isEmpty())
+			prettyMirrors = "none";
+		else {
+			for (AnnotationMirror mirror : annotationMirrors) {
+				prettyMirrors = prettyMirrors.concat("\n\t\t\t" + mirror.getAnnotationType().toString());
+				
+				//annotation values
+				for (AnnotationValue x : mirror.getElementValues().values()) {
+					prettyMirrors = prettyMirrors.concat("\n\t\t\t\t\\- " +
+							x.toString() + "\n\t\t\t\t\tvalue = " + x.getValue().toString());
+				}
+			}
+		}
+		Set<Modifier> modifiers = element.getModifiers();
+		String modifierToString = "" + modifiers.size();
+		for (Modifier mod : modifiers) {
+			modifierToString = modifierToString.concat(mod.toString() + ",");
+		}
+		return "\nElement:\t" + element.getKind().toString() + "\n\t\tName = " + element.getSimpleName()
+				+ "\n\t\tAs type: " + element.asType().toString()
+				+ "\n\t\tModifiers: " + modifiers
+				+ "\n\t\tAnnotations: " + prettyMirrors
+				+ "\n\t\tEnclosing Element = " + element.getEnclosingElement().asType();
 	}
 }

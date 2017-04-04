@@ -19,6 +19,7 @@ package edu.gvsu.prestongarno;
 
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import edu.gvsu.prestongarno.annotations.View;
+import edu.gvsu.prestongarno.transformation.ViewTransformer;
 
 import java.util.*;
 import javax.annotation.processing.*;
@@ -32,37 +33,38 @@ public class MVProc extends AbstractProcessor {
 	
 	
 	
-	RoundEnvironment roundEnvironment;
+	private RoundEnvironment roundEnvironment;
 	public Messager messager;
+	private int roundCount;
 	
 	//Rules annotation type element:
-	TypeElement annotationRule;
+	private TypeElement annotationRule;
 	
 	/******************************************************************************************
 	 * Hacks with the AST
 	 ******************************************************************************************/
 	//Context javaContext;
-	JavacProcessingEnvironment javacEnv;
+	private JavacProcessingEnvironment javacEnv;
 	/******************************************************************************************/
 	private static MVProc instance;
-	
-	private ViewTransformer viewTransformer;
 	
 	@Override
 	public synchronized void init(ProcessingEnvironment pe) {
 		super.init(pe);
+		this.roundCount = 0;
 		javacEnv = ((JavacProcessingEnvironment) pe);
 	}
 	
 	@Override
 	public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-		if (!roundEnvironment.processingOver()) {
+		if (roundCount++ == 0) {
 			this.initializeProc(roundEnvironment);
 			
-			viewTransformer = new ViewTransformer(this.javacEnv);
+			ViewTransformer viewTransformer;
 			
 			for (Element o : roundEnvironment.getElementsAnnotatedWith(View.class)) {
-				this.viewTransformer.getTree(o).accept(viewTransformer);
+				viewTransformer = new ViewTransformer(javacEnv);
+				viewTransformer.getTree(o).accept(viewTransformer);
 			}
 			
 			instance = null;

@@ -20,6 +20,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import edu.gvsu.prestongarno.MVProc;
+import edu.gvsu.prestongarno.Presenter;
 import edu.gvsu.prestongarno.annotations.TranslateView;
 import org.junit.Test;
 
@@ -89,13 +90,10 @@ public class CompilerTests1 {
 		
 		Object instance = clazz.newInstance();
 		
-		Arrays.stream(instance.getClass().getInterfaces())
-				.forEach(aClass -> System.out.println(aClass.getTypeName()));
-		
-		Arrays.stream(instance.getClass().getMethods()).forEach(method -> System.out.println(method.toString()));
-		
-		System.out.println(instance);
 		assertTrue(instance instanceof TranslateView);
+		final Presenter presenter = ((TranslateView) instance).create();
+		assertTrue(presenter.getClass().getSimpleName().equals("SamplePresenter"));
+		
 		outputDiagnostics(compilation);
 	}
 }
