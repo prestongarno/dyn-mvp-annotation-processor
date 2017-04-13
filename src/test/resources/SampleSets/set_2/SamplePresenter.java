@@ -49,11 +49,6 @@ public class SamplePresenter extends Presenter {
 		public NumberRequestEvent(OnNumberProvided callback) {
 			super(callback);
 		}
-		
-		@Override
-		public OnNumberProvided call() {
-			return super.call();
-		}
 	}
 	
 	@Callback

@@ -56,7 +56,6 @@ import static com.sun.tools.javac.tree.JCTree.*;
 public class ViewTransformer extends TreeTranslator {
 	
 	
-	private final Map<String, ArrayList<JCTree>> sourceMap;
 	private JavacProcessingEnvironment env;
 	private Trees trees;
 	private TreeMaker mod;
@@ -67,13 +66,13 @@ public class ViewTransformer extends TreeTranslator {
 	
 	public ViewTransformer(JavacProcessingEnvironment environment) {
 		this.env = environment;
+		// symbol for the "TranslateView" interface that returns a presenter
 		translateSym = env.getElementUtils().getTypeElement("edu.gvsu.prestongarno.annotations.TranslateView");
 		trees = Trees.instance(environment);
 		mod = TreeMaker.instance(environment.getContext());
 		elements = JavacElements.instance(environment.getContext());
 		names = Names.instance(environment.getContext());
 		symtab = Symtab.instance(environment.getContext());
-		sourceMap = getSourceMap(environment);
 	}
 	
 	public JCTree getTree(Element element) {
@@ -154,64 +153,5 @@ public class ViewTransformer extends TreeTranslator {
 		return trees;
 	}
 	
-	/*****************************************
-	 * Get all AST nodes through reflection
-	 * @param environment the javac environment
-	 * @return a map of all compiling classes and all nodes in the AST for each class
-	 ****************************************/
-	private Map<String, ArrayList<JCTree>> getSourceMap(JavacProcessingEnvironment environment) {
-		Context context = environment.getContext();
-		Field f;
-		try {
-			f = context.getClass().getDeclaredField("ht");
-			f.setAccessible(true);
-			
-			//noinspection unchecked
-			Map<Context.Key, Object> map = (Map<Context.Key, Object>) f.get(context);
-			
-			final Log logger = map.entrySet().stream()
-					.filter(entry -> entry.getValue() instanceof Log)
-					.map(entry -> ((Log) entry.getValue()))
-					.findAny().orElseThrow(IllegalStateException::new);
-			
-			f = logger.getClass()
-					.getSuperclass()
-					.getDeclaredField("sourceMap");
-			f.setAccessible(true);
-			
-			@SuppressWarnings("unchecked")
-			Map<JavaFileObject, DiagnosticSource> sourceMap =
-					(Map<JavaFileObject, DiagnosticSource>) f.get(logger);
-			
-			Map<String, ArrayList<JCTree>> classes = new HashMap<>();
-			
-			for (DiagnosticSource ds : sourceMap.values()) {
-				String className = ds.getFile().getName();
-				
-				f = ds.getClass().getDeclaredField("endPosTable");
-				f.setAccessible(true);
-				EndPosTable obj = (EndPosTable) f.get(ds);
-				f = obj.getClass().getDeclaredField("endPosMap");
-				f.setAccessible(true);
-				IntHashTable table = (IntHashTable) f.get(obj);
-				f = table.getClass().getDeclaredField("objs");
-				f.setAccessible(true);
-				
-				Object[] source = (Object[]) f.get(table);
-				
-				ArrayList<JCTree> trees = new ArrayList<JCTree>();
-				
-				for (int i = 0; i < source.length; i++) {
-					trees.add((JCTree) source[i]);
-				}
-				classes.put(className, trees);
-			}
-			
-			return classes;
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 }

@@ -32,19 +32,13 @@ import java.util.List;
  * 	3) replace the lambdas with method invocation statements
  *		4) resolve these by case/switch logic on which method to invoke to get which instance of the interface based off of what event (also harder than it looks...)
  * ***************************************************/
-public class LambdaUtils {
-	
-	
-	public static List<JCTree.JCLambda> getLambdasFor(JCTree.JCClassDecl classDecl) {
-		ArrayList<JCTree.JCLambda> lambdas = new ArrayList<>();
-		classDecl.accept(new TreeTranslator(){
-			@Override
-			public void visitLambda(JCTree.JCLambda lambda) {
-				super.visitLambda(lambda);
-				lambdas.add(lambda);
-			}
-		});
-		return lambdas;
-	}
-	
+public final class LambdaUtils {
+
+    //method that gets the body of the lambda and determines if
+    // it needs to capture anything for the static method invocation
+    static boolean hasCaptures(JCTree.JCLambda lambda) {
+        System.out.println(lambda.getBodyKind());
+        return false;
+    }
+
 }

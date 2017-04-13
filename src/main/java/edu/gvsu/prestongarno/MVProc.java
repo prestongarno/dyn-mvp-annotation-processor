@@ -19,6 +19,7 @@ package edu.gvsu.prestongarno;
 
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import edu.gvsu.prestongarno.annotations.View;
+import edu.gvsu.prestongarno.transformation.CompileContext;
 import edu.gvsu.prestongarno.transformation.ViewTransformer;
 
 import java.util.*;
@@ -59,6 +60,7 @@ public class MVProc extends AbstractProcessor {
 	public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
 		if (roundCount++ == 0) {
 			this.initializeProc(roundEnvironment);
+			CompileContext.createInstance(this.javacEnv);
 			
 			ViewTransformer viewTransformer;
 			

@@ -19,6 +19,7 @@ package edu.gvsu.prestongarno.sourcegentests;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import edu.gvsu.prestongarno.Event;
 import edu.gvsu.prestongarno.MVProc;
 import edu.gvsu.prestongarno.Presenter;
 import edu.gvsu.prestongarno.annotations.TranslateView;
@@ -93,7 +94,12 @@ public class CompilerTests1 {
 		assertTrue(instance instanceof TranslateView);
 		final Presenter presenter = ((TranslateView) instance).create();
 		assertTrue(presenter.getClass().getSimpleName().equals("SamplePresenter"));
-		
 		outputDiagnostics(compilation);
+	}
+
+
+	@Test
+	public void changeLambdaCaptureToStaticMethod_Goal() throws Exception {
+
 	}
 }
