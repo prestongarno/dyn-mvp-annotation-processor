@@ -39,30 +39,32 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class CompileContext {
 	
-	private Map<String, ArrayList<JCTree>> sourceMap;
-	private JavacProcessingEnvironment env;
-	private Trees trees;
-	private TreeMaker mod;
-	private Names names;
-	private JavacElements elements;
-	private Symtab symtab;
-	private Symbol.ClassSymbol translateSym;
+	Map<String, ArrayList<JCTree>> sourceMap;
+	JavacProcessingEnvironment env;
+	Trees trees;
+	TreeMaker mod;
+	Names names;
+	JavacElements elements;
+	Symtab symtab;
+	Symbol.ClassSymbol translateSym;
+	final Symbol.PackageSymbol ROOT_PKG;
 	
 	private static CompileContext instance;
 	
 	private CompileContext(JavacProcessingEnvironment environment){
-		instance.env = environment;
+		env = environment;
 		// symbol for the "TranslateView" interface that returns a presenter
-		instance.translateSym = env.getElementUtils().getTypeElement("edu.gvsu.prestongarno.annotations.TranslateView");
+		translateSym = env.getElementUtils().getTypeElement("edu.gvsu.prestongarno.annotations.TranslateView");
 		trees = Trees.instance(environment);
 		mod = TreeMaker.instance(environment.getContext());
 		elements = JavacElements.instance(environment.getContext());
 		names = Names.instance(environment.getContext());
 		symtab = Symtab.instance(environment.getContext());
 		sourceMap = getSourceMap(environment);
+		ROOT_PKG = symtab.rootPackage;
 	}
 	
-	public CompileContext getInstance() {
+	public static CompileContext getInstance() {
 		return instance;
 	}
 	

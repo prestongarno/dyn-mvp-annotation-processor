@@ -37,7 +37,6 @@ public final class LambdaUtils {
     //method that gets the body of the lambda and determines if
     // it needs to capture anything for the static method invocation
     static boolean hasCaptures(JCTree.JCLambda lambda) {
-        System.out.println(lambda.getBodyKind());
         return false;
     }
 

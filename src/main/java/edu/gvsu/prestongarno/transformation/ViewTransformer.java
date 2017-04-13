@@ -21,18 +21,15 @@ package edu.gvsu.prestongarno.transformation;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
-import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.tree.TreeTranslator;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.model.JavacElements;
+import com.sun.tools.javac.util.Name;
 
-import javax.lang.model.element.Element;
-import javax.tools.JavaFileObject;
-import java.lang.reflect.Field;
-import java.util.*;
+import javax.lang.model.element.*;
 
 import static com.sun.tools.javac.code.Symbol.*;
 import static com.sun.tools.javac.tree.JCTree.*;
@@ -54,25 +51,26 @@ import static com.sun.tools.javac.tree.JCTree.*;
  				translator itself, but return
  * ***************************************************/
 public class ViewTransformer extends TreeTranslator {
-	
-	
-	private JavacProcessingEnvironment env;
-	private Trees trees;
-	private TreeMaker mod;
-	private Names names;
-	private JavacElements elements;
-	private Symtab symtab;
+
+	private final JavacProcessingEnvironment env;
+	private final Trees trees;
+	private final TreeMaker MODIFIER;
+	private final Names names;
+	private final JavacElements elements;
+	private final Symtab symtab;
 	private final ClassSymbol translateSym;
 	
-	public ViewTransformer(JavacProcessingEnvironment environment) {
-		this.env = environment;
+	public ViewTransformer(CompileContext context) {
+		this.env = context.env;
+
 		// symbol for the "TranslateView" interface that returns a presenter
 		translateSym = env.getElementUtils().getTypeElement("edu.gvsu.prestongarno.annotations.TranslateView");
-		trees = Trees.instance(environment);
-		mod = TreeMaker.instance(environment.getContext());
-		elements = JavacElements.instance(environment.getContext());
-		names = Names.instance(environment.getContext());
-		symtab = Symtab.instance(environment.getContext());
+
+		trees = context.trees;
+		MODIFIER = context.mod;
+		elements = context.elements;
+		names = context.names;
+		symtab = context.symtab;
 	}
 	
 	public JCTree getTree(Element element) {
@@ -82,15 +80,33 @@ public class ViewTransformer extends TreeTranslator {
 	@Override
 	public void visitLambda(JCLambda lambda) {
 		super.visitLambda(lambda);
+		printLambda(lambda);
+	}
+
+	private void printLambda(JCLambda lambda) {
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<============>>>>>>>>>>>>>>>>");
 		System.out.println(lambda);
+		System.out.println(lambda.getBodyKind());
+		System.out.println("============");
+		lambda.getParameters().forEach(e -> System.out.println("Parameter: " + e + " Name: " + e.getName() + " Kind: " + e.getKind() + " Type: " + e.getType()));
+		System.out.println("============");
+		System.out.println("Can complete Normally: " + lambda.canCompleteNormally);
+		System.out.println("============");
+		System.out.println(lambda.getKind());
+		System.out.println("============");
+		System.out.println(lambda.paramKind);
+		System.out.println("============");
+		System.out.println("isStandalone" + lambda.isStandalone());
+		System.out.println("============");
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<============>>>>>>>>>>>>>>>>");
 	}
 	
 	@Override
 	public void visitClassDef(JCClassDecl decl) {
 		super.visitClassDef(decl);
 		
-		JCFieldAccess iae = mod.Select(
-				mod.Select( mod.Ident(elements.getName("java")), elements.getName("lang")),
+		JCFieldAccess iae = MODIFIER.Select(
+				MODIFIER.Select( MODIFIER.Ident(elements.getName("java")), elements.getName("lang")),
 				elements.getName("IllegalArgumentException"));
 		
 		MethodSymbol m = (MethodSymbol)
@@ -111,25 +127,25 @@ public class ViewTransformer extends TreeTranslator {
 				.next()
 				.getValue();
 		
-		JCExpression jcf = mod.Ident(annotationValue.tsym);
+		JCExpression jcf = MODIFIER.Ident(annotationValue.tsym);
 		
-		JCModifiers modifiers = mod.Modifiers(Flags.PUBLIC);
+		JCModifiers modifiers = MODIFIER.Modifiers(Flags.PUBLIC);
 		Name name = m.name;
-		JCExpression methodReturnType = mod.Type(m.getReturnType());
+		JCExpression methodReturnType = MODIFIER.Type(m.getReturnType());
 		List<JCTypeParameter> methodGenerics = List.nil();
 		List<JCTree.JCVariableDecl> methodParams = List.nil();
 		List<JCTree.JCExpression> methodThrows = List.nil();
-		final List<JCStatement> of = List.of(mod.Return(mod.NewClass(
+		final List<JCStatement> of = List.of(MODIFIER.Return(MODIFIER.NewClass(
 				null,
 				List.nil(),
 				jcf,
 				List.nil(),
 				null
 		)));
-		JCBlock methBlock = mod.Block(0, of);
+		JCBlock methBlock = MODIFIER.Block(0, of);
 		
 		
-		JCMethodDecl meth = mod.MethodDef(
+		JCMethodDecl meth = MODIFIER.MethodDef(
 				modifiers,
 				name,
 				methodReturnType,

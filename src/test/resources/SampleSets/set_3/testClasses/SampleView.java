@@ -14,13 +14,13 @@
  *        limitations under the License.
  */
 
-package edu.gvsu.prestongarno.sourcegentests;
+package edu.gvsu.prestongarno.sourcegentests.testClasses;
 
 import edu.gvsu.prestongarno.Event;
 import edu.gvsu.prestongarno.annotations.View;
 import edu.gvsu.prestongarno.annotations.TranslateView;
-import edu.gvsu.prestongarno.sourcegentests.SamplePresenter;
-import edu.gvsu.prestongarno.sourcegentests.SamplePresenter.NumberRequestEvent;
+import edu.gvsu.prestongarno.sourcegentests.testClasses.SamplePresenter;
+import edu.gvsu.prestongarno.sourcegentests.testClasses.SamplePresenter.NumberRequestEvent;
 
 
 /** **************************************************

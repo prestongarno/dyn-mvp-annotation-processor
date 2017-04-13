@@ -37,6 +37,7 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
 
@@ -60,14 +61,25 @@ public class CompilerUtil {
 	 * @throws IOException
 	 ****************************************/
 	public static List<JavaFileObject> loadClassSet(int index) throws IOException {
+
 		return Files.list((new File(System.getProperty("user.dir") + TEST_CLASS_SET_DIRECTORY + "/set_" + index)
 				.toPath()))
 				.map(Path::toFile)
-				.filter(File::isFile)
+				.flatMap(CompilerUtil::flattenDir)
 				.filter(File::canRead)
 				.map(File::toPath)
 				.map(CompilerUtil.logPath::print)
-				.map(CompilerUtil.converter::toJavaFileObject).collect(toList());
+				.map(CompilerUtil.converter::toJavaFileObject)
+				.collect(toList());
+	}
+
+	private static Stream<? extends File> flattenDir(File dir) {
+		File[] contents = dir.listFiles();
+
+		if(contents == null || contents.length == 0) return Stream.of(dir);
+
+		else return Arrays.stream(contents)
+				.flatMap(CompilerUtil::flattenDir);
 	}
 	
 	@FunctionalInterface
@@ -84,8 +96,6 @@ public class CompilerUtil {
 	
 	@FunctionalInterface
 	private interface PathConverter {
-		
-		
 		JavaFileObject toJavaFileObject(Path path);
 	}
 	
@@ -96,7 +106,7 @@ public class CompilerUtil {
 		try {
 			return JavaFileObjects.forResource(path.toUri().toURL());
 		} catch (MalformedURLException e) {
-			return null;
+			throw new IllegalArgumentException("No such file");
 		}
 	};
 	

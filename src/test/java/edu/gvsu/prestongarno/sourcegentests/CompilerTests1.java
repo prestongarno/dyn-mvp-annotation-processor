@@ -23,9 +23,13 @@ import edu.gvsu.prestongarno.Event;
 import edu.gvsu.prestongarno.MVProc;
 import edu.gvsu.prestongarno.Presenter;
 import edu.gvsu.prestongarno.annotations.TranslateView;
+import edu.gvsu.prestongarno.transformation.CompileContext;
+import org.junit.Before;
 import org.junit.Test;
 
+import javax.tools.JavaFileObject;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
@@ -38,14 +42,22 @@ import static org.junit.Assert.assertTrue;
  * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests - by Preston Garno on 3/10/17
  ****************************************/
 public class CompilerTests1 {
-	
-	
+
+	private Compiler javac;
+	private MVProc proc;
+
+	@Before
+	public void setUp() throws Exception {
+		javac = javac();
+		proc = new MVProc();
+	}
+
 	/*****************************************
 	 * Simple test compile without any annotation processing
 	 ****************************************/
 	@Test
 	public void simpleTestCompile() throws Exception {
-		Compilation compilation = javac().compile(
+		Compilation compilation = javac.compile(
 				JavaFileObjects.forSourceString("HelloWorld", "final class HelloWorld {}"));
 		assertThat(compilation).succeeded();
 	}
@@ -53,7 +65,7 @@ public class CompilerTests1 {
 	@Test
 	public void testWithProcessor() throws Exception {
 		Compilation compilation =
-				javac()
+				javac
 						.withProcessors(new MVProc())
 						.compile(loadClassSet(0));
 		assertThat(compilation).succeededWithoutWarnings();
@@ -63,7 +75,7 @@ public class CompilerTests1 {
 	
 	@Test
 	public void testMultipleFileCompilation() throws Exception {
-		Compilation compilation = javac()
+		Compilation compilation = javac
 				.withProcessors(new MVProc())
 				.compile(loadClassSet(2));
 		outputDiagnostics(compilation);
@@ -74,8 +86,6 @@ public class CompilerTests1 {
 	 ****************************************/
 	@Test
 	public void testClassloaderCreateFiles() throws Exception {
-		final Compiler javac = javac();
-		final MVProc proc = new MVProc();
 		Compilation compilation = javac
 				.withProcessors(proc)
 				.compile(loadClassSet(2));
@@ -100,6 +110,13 @@ public class CompilerTests1 {
 
 	@Test
 	public void changeLambdaCaptureToStaticMethod_Goal() throws Exception {
+		List<JavaFileObject> files = loadClassSet(3);
+		files.forEach(System.out::println);
 
+		Compilation c = javac
+				.withProcessors(this.proc)
+				.compile(files);
+
+		assertThat(c).succeeded();
 	}
 }

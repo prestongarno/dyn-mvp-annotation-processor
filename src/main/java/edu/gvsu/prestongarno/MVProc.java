@@ -65,7 +65,7 @@ public class MVProc extends AbstractProcessor {
 			ViewTransformer viewTransformer;
 			
 			for (Element o : roundEnvironment.getElementsAnnotatedWith(View.class)) {
-				viewTransformer = new ViewTransformer(javacEnv);
+				viewTransformer = new ViewTransformer(CompileContext.getInstance());
 				viewTransformer.getTree(o).accept(viewTransformer);
 			}
 			
