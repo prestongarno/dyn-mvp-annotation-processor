@@ -13,9 +13,8 @@
   ~        See the License for the specific language governing permissions and
   ~        limitations under the License.
   -->
-Some notes from testing a bit of metaprogramming for this somewhat proof-of-concept library. The Java compiler API is sorely lacking in the public availability of documentation department so trying to memorize it isn't very easy.
+__Some notes from testing a bit of metaprogramming for this somewhat proof-of-concept library. The Java compiler API is sorely lacking in the public availability of documentation department so trying to memorize it isn't very easy.__
 
-__Things to know when messing around with undocumented javac code:__
 1) composition rather than inheritance for complicated GUI systems<br><br>
 "Inheritance is most useful for grouping related sets of concepts, identifying families of classes, and in general organizing the names and concepts that describe the domain. As we delve deeper into the implementation of a system, we may find that our original generalizations about the domain concepts, captured in our inheritance hierarchies, are beginning to shred. Don’t be afraid to disassemble inheritance hierarchies into sets of complementary cooperating interfaces and components when the code leads you in that direction" <br> <br>
 2) start off with stateless events/event handlers - worry about 2-way events later
@@ -44,7 +43,7 @@ ___[Primary Javac Tree types cheat sheet](https://docs.oracle.com/javase/8/docs/
 |Declaration| JCDeclaration | Declare a variable | int i; |
 |Statement| JCStatement | Complete line of code | this.toString(); |
 |Expression| JCExpressionStatement | Wrap these with ^^ | this.toString |
-|Methods|JCMethodDef & | Declare and invoke methods | this.toString |
+|Methods|JCMethodDef | Declare | this.toString |
 |Class| JCClassDecl | class declaration| public class Pi{} |
 |Method invocation|JCMethodInvokation| invoke a method (wrap in JCStatement or use with JCIdent) | this.toString() |
 |Primitives| JCPrimitiveTypeTree | primitives (int, long)| 35 |
