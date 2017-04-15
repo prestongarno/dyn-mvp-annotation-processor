@@ -15,6 +15,24 @@
   -->
 __Some notes from testing a bit of metaprogramming for this somewhat proof-of-concept library. The Java compiler API is sorely lacking in the public availability of documentation department so trying to memorize it isn't very easy.__
 
+Backwards compatible lambdas exist but this lib needs to do it no matter what, fake define a final inner class could get interesting.  Had this idea and then noticed JDK9 is working on the same thing. Here's what they say (can't find original source):
+
+   1. Make up a new name nobody has used yet.
+   2. Inspect the tail-header of the class to find the this_class index.
+   3. Patch the CONSTANT_Class for this_class to the new name.
+   4. Add other CP entries required by (e.g.) string patches.
+   5. Flatten Class constants down to their names, making sure that
+      the host class loader can pick them up again accurately.
+   6. Generate the edited class file bytes.
+       
+Potential limitations:
+   * The class won't be truly anonymous, and may interfere with others.
+   * Flattened class constants might not work, because of loader issues. (although lambdas require effectively final var anyways to capture though...)
+   * Pseudo-string constants will not flatten down to real strings.
+   * Method handles will (of course) fail to flatten to linkage strings.
+
+Pros:
+
 1) composition rather than inheritance for complicated GUI systems<br><br>
 "Inheritance is most useful for grouping related sets of concepts, identifying families of classes, and in general organizing the names and concepts that describe the domain. As we delve deeper into the implementation of a system, we may find that our original generalizations about the domain concepts, captured in our inheritance hierarchies, are beginning to shred. Don’t be afraid to disassemble inheritance hierarchies into sets of complementary cooperating interfaces and components when the code leads you in that direction" <br> <br>
 2) start off with stateless events/event handlers - worry about 2-way events later
