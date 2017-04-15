@@ -36,7 +36,6 @@ import java.util.Map;
 /** **************************************************
  * Dynamic-MVP - edu.gvsu.prestongarno.transformation - by Preston Garno on 4/11/17
  * ***************************************************/
-@SuppressWarnings("unchecked")
 public class CompileContext {
 	
 	Map<String, ArrayList<JCTree>> sourceMap;
@@ -77,6 +76,7 @@ public class CompileContext {
 	 * @param environment the javac environment
 	 * @return a map of all compiling classes and all nodes in the AST for each class
 	 ****************************************/
+	@SuppressWarnings("unchecked")
 	private Map<String, ArrayList<JCTree>> getSourceMap(JavacProcessingEnvironment environment) {
 		Context context = environment.getContext();
 		Field f;

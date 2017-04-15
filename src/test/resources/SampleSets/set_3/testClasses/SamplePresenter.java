@@ -17,20 +17,25 @@
 package edu.gvsu.prestongarno.sourcegentests.testClasses;
 
 import edu.gvsu.prestongarno.Event;
+import edu.gvsu.prestongarno.annotations.EventDefinition;
 import edu.gvsu.prestongarno.Presenter;
 import edu.gvsu.prestongarno.annotations.Callback;
 import edu.gvsu.prestongarno.annotations.EventHandler;
 
-
 /** **************************************************
- * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleSets.set_2 - by Preston Garno on 3/25/17
+ * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleSets.set_3 - by Preston Garno on 3/25/17
  * ***************************************************/
 public class SamplePresenter extends Presenter {
 	
 	public SamplePresenter() {
-		//required noArg constructor
 	}
-	
+
+
+	@FunctionalInterface
+	public interface OnNumberProvided {
+		void onReturnNumber(int number);
+	}
+
 	/*****************************************
 	 * The presenter event handler
 	 * @param event the event
@@ -41,19 +46,9 @@ public class SamplePresenter extends Presenter {
 	}
 	
 	/*****************************************
-	 * A sample event definition: provide a limit and a callback implementation
-	 * of type OnNumberProvided and a callback will be invoked callback.onReturnNumber( param )
-	 * on the view class dynamically
+	 * Changed the Event class to concrete class to allow for shorter syntax
+	 * Event-Callback provided by public final fields or methods
 	 ****************************************/
-	static class NumberRequestEvent extends Event<OnNumberProvided> {
-		public NumberRequestEvent(OnNumberProvided callback) {
-			super(callback);
-		}
-	}
-	
-	@Callback
-	@FunctionalInterface
-	public interface OnNumberProvided {
-		void onReturnNumber(int number);
-	}
+	@Event public final Event<OnNumberProvided> OnSampleEvent = Event.define();
+
 }

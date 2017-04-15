@@ -19,9 +19,6 @@ package edu.gvsu.prestongarno.sourcegentests.testClasses;
 import edu.gvsu.prestongarno.Event;
 import edu.gvsu.prestongarno.annotations.View;
 import edu.gvsu.prestongarno.annotations.TranslateView;
-import edu.gvsu.prestongarno.sourcegentests.testClasses.SamplePresenter;
-import edu.gvsu.prestongarno.sourcegentests.testClasses.SamplePresenter.NumberRequestEvent;
-
 
 /** **************************************************
  * Dynamic-MVP - edu.gvsu.prestongarno.sourcegentests.SampleSets.set_2 - by Preston Garno on 3/25/17

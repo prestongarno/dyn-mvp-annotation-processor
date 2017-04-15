@@ -112,12 +112,11 @@ public class CompilerUtil {
 	
 	public static void outputDiagnostics(Compilation compilation) {
 		List<? extends Diagnostic> diagnostics = compilation.diagnostics();
-		for (Diagnostic d : diagnostics) {
+		diagnostics.forEach(d -> {
 			System.out.println("================================================");
 			System.out.println("Diagnostic: " + d.getKind().toString());
-			System.out.println("Source = " + d.getSource());
 			System.out.println(d.getMessage(Locale.ENGLISH));
-		}
+		});
 	}
 	
 	/*****************************************

@@ -19,16 +19,13 @@ package edu.gvsu.prestongarno.sourcegentests;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
-import edu.gvsu.prestongarno.Event;
 import edu.gvsu.prestongarno.MVProc;
 import edu.gvsu.prestongarno.Presenter;
 import edu.gvsu.prestongarno.annotations.TranslateView;
-import edu.gvsu.prestongarno.transformation.CompileContext;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.tools.JavaFileObject;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;

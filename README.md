@@ -47,3 +47,41 @@ ___[Primary Javac Tree types cheat sheet](https://docs.oracle.com/javase/8/docs/
 |Class| JCClassDecl | class declaration| public class Pi{} |
 |Method invocation|JCMethodInvokation| invoke a method (wrap in JCStatement or use with JCIdent) | this.toString() |
 |Primitives| JCPrimitiveTypeTree | primitives (int, long)| 35 |
+
+
+// todo account for MethodHandle types!
+
+enum {
+    JVM_CONSTANT_Utf8                   = 1,
+    JVM_CONSTANT_Unicode                = 2, /* unused */
+    JVM_CONSTANT_Integer                = 3,
+    JVM_CONSTANT_Float                  = 4,
+    JVM_CONSTANT_Long                   = 5,
+    JVM_CONSTANT_Double                 = 6,
+    JVM_CONSTANT_Class                  = 7,
+    JVM_CONSTANT_String                 = 8,
+    JVM_CONSTANT_Fieldref               = 9,
+    JVM_CONSTANT_Methodref              = 10,
+    JVM_CONSTANT_InterfaceMethodref     = 11,
+    JVM_CONSTANT_NameAndType            = 12,
+    JVM_CONSTANT_MethodHandle           = 15,  // JSR 292
+    JVM_CONSTANT_MethodType             = 16,   // JSR 292
+    JVM_CONSTANT_InvokeDynamic          = 18
+};
+
+/* JVM_CONSTANT_MethodHandle subtypes */
+enum {
+    JVM_REF_getField                = 1,
+    JVM_REF_getStatic               = 2,
+    JVM_REF_putField                = 3,
+    JVM_REF_putStatic               = 4,
+    JVM_REF_invokeVirtual           = 5,
+    JVM_REF_invokeStatic            = 6,
+    JVM_REF_invokeSpecial           = 7,
+    JVM_REF_newInvokeSpecial        = 8,
+    JVM_REF_invokeInterface         = 9
+};
+/**
+     * Lambda expressions come in two forms: (i) expression lambdas, whose body
+     * is an expression, and (ii) statement lambdas, whose body is a block
+     */
