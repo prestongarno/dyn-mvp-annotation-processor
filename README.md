@@ -13,7 +13,7 @@
   ~        See the License for the specific language governing permissions and
   ~        limitations under the License.
   -->
-__Some notes from testing a bit of metaprogramming for this somewhat proof-of-concept library. The Java compiler API is sorely lacking in the public availability of documentation department so trying to memorize it isn't very easy.__
+__Notes.  This is an experimental project - with no goal in particular except learning to push javac to the limit__
 
 Backwards compatible lambdas exist but this lib needs to do it no matter what, fake define a final inner class could get interesting.  Had this idea and then noticed JDK9 is working on the same thing. Here's what they say (can't find original source):
 
